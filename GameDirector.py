@@ -18,6 +18,7 @@ class CheckState(GameState):
          return RemoveState(self.grid, matches)
       else:
          return SpawnState(self.grid)
+         #return ReadyState(self.grid)
 
 #removes matches from the grid
    #Remove -> Fall
@@ -31,9 +32,14 @@ class RemoveState(GameState):
 
 #moves block down
    #Fall -> Check
+gravity = .01
 class FallState(GameState):
    def update(self, inputs):
-      self.grid.moveCellsDown()
+      toMove = self.grid.moveCellsDown()
+      if toMove != None:
+         for col in toMove:
+            for pair in col:
+               self.grid.swapCells(pair[0],pair[1])
       return CheckState(self.grid)
 
 #spawns new blocks into the grid

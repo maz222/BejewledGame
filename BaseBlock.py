@@ -9,21 +9,28 @@ class BaseBlock:
 		# 2 - #90B31E
 		# 3 - #1E90B3
 		# 4 - #411EB3
+
+	#position = top left corner of block (in pixels) [x,y]
 	
-	def __init__(self, color):
+	def __init__(self, color, position):
 		self.color = color
 		self.isMoveable = True
 		self.baseWidth = 50
 		self.baseHeight = 50
+		self.position = position
 
 	def getColor(self):
 		return self.color
 
-	#position = (x,y) for uper left corner
-	def draw(self, screen, position, scale=1):
+	def updatePosition(self, newPosition):
+		#print("updating from: " + str(self.position) + " to: " + str(newPosition))
+		self.position = newPosition
+
+	#offset = (x,y) for uper left corner of the grid
+	def draw(self, screen, offset, scale=1):
 		hexColor = colorDict[self.color].lstrip("#")
 		rgbColor = tuple(int(hexColor[i:i+2], 16) for i in (0, 2 ,4))
-		pygame.draw.rect(screen, rgbColor, (position[0],position[1], self.baseWidth*scale, self.baseHeight*scale), 0)
+		pygame.draw.rect(screen, rgbColor, (offset[0] + self.position[0],offset[1] + self.position[1], self.baseWidth*scale, self.baseHeight*scale), 0)
 
 	def __str__(self):
 		return str(self.color)
