@@ -1,4 +1,5 @@
 import pygame
+import math
 
 #base/template state
 class GameState:
@@ -6,6 +7,10 @@ class GameState:
       self.grid = gridManager
    def update(self, inputs):
       pass
+   def draw(self, screen, scale=1):
+      gridPos = ((1280/2 - 300),(720/2 - 300))
+      screen.fill((200,200,200))
+      self.grid.draw(screen, gridPos)
 
 
 #checks the grid for matches
@@ -26,21 +31,18 @@ class RemoveState(GameState):
    def __init__(self, gridManager, matches):
       self.matches = matches
       self.grid = gridManager
+      self.shrink = 1.0
    def update(self, inputs):
-      self.grid.removeMatches(self.matches)
-      return FallState(self.grid)
-
-#moves block down
-   #Fall -> Check
-gravity = .01
-class FallState(GameState):
-   def update(self, inputs):
-      toMove = self.grid.moveCellsDown()
-      if toMove != None:
-         for col in toMove:
-            for pair in col:
-               self.grid.swapCells(pair[0],pair[1])
-      return CheckState(self.grid)
+      self.shrink -= 0.1
+      print(self.shrink)
+      if self.shrink <= 0.0:
+         self.grid.removeMatches(self.matches)
+         return FallState(self.grid)
+      return self
+   def draw(self, screen):
+      gridPos = ((1280/2 - 300),(720/2 - 300))
+      screen.fill((200,200,200))
+      self.grid.draw(screen, gridPos)
 
 #spawns new blocks into the grid
    #Spawn -> Fall (new blocks spawned)
@@ -50,7 +52,8 @@ class SpawnState(GameState):
       emptyCells = self.grid.getEmptyCells()
       if len(emptyCells) > 0:
          self.grid.spawnNewCells(emptyCells)
-         return FallState(self.grid)
+         #return FallState(self.grid)
+         return CheckState(self.grid)
       else:
          return ReadyState(self.grid)
 
@@ -73,6 +76,41 @@ class ReadyState(GameState):
                return FallState(self.grid)
       return self
 
+gravity = .01
+cellHeight = 50
+cellWidth = 50
+padding = 10
+#moves block down
+   #Fall -> Check
+class FallState(GameState):
+   def __init__(self, gridManager):
+      self.grid = gridManager
+      self.toMove = self.grid.moveCellsDown()
+      self.blockSpeed = gravity
+   def update(self, inputs):
+      self.blockSpeed += gravity
+      if self.toMove == None or len(self.toMove) == 0:
+         return CheckState(self.grid)
+      #iterate over a copy of the list so that you can alter/remove from it
+      for col in list(self.toMove):
+         for pair in list(col):
+            block = self.grid.getCell(pair[0])
+            targetPosition = (pair[1][1]*(cellWidth+padding), pair[1][0]*(cellHeight+padding))
+            oldDistance = math.sqrt((targetPosition[0]-block.position[0])**2 + (targetPosition[1]-block.position[1])**2)
+            xSlope = targetPosition[0] - block.position[0]
+            ySlope = targetPosition[1] - block.position[1]
+            newPos = (block.position[0] + self.blockSpeed*xSlope, block.position[1] + self.blockSpeed*ySlope)
+            newDistance = math.sqrt((targetPosition[0]-newPos[0])**2 + (targetPosition[1]-newPos[1])**2)
+            # done moving
+            if xSlope == 0 and ySlope == 0:
+               self.grid.swapCells(pair[0],pair[1])
+               col.remove(pair)
+            else:
+               block.position = newPos
+         if len(col) == 0:
+            self.toMove.remove(col)
+      return self
+
 
 #state machine
 class GameDirector:
@@ -82,7 +120,4 @@ class GameDirector:
    def update(self, inputs):
       self.currentState = self.currentState.update(inputs)
    def draw(self, screen):
-      gridPos = ((1280/2 - 300),(720/2 - 300))
-      screen.fill((200,200,200))
-      self.grid.draw(screen, gridPos)
-
+      self.currentState.draw(screen)

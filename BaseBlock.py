@@ -30,7 +30,7 @@ class BaseBlock:
 	def draw(self, screen, offset, scale=1):
 		hexColor = colorDict[self.color].lstrip("#")
 		rgbColor = tuple(int(hexColor[i:i+2], 16) for i in (0, 2 ,4))
-		pygame.draw.rect(screen, rgbColor, (offset[0] + self.position[0],offset[1] + self.position[1], self.baseWidth*scale, self.baseHeight*scale), 0)
+		pygame.draw.rect(screen, rgbColor, (offset[0] + self.position[0],offset[1] + self.position[1], int(self.baseWidth*scale), int(self.baseHeight*scale)), 0)
 
 	def __str__(self):
 		return str(self.color)

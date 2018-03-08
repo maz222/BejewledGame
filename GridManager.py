@@ -91,7 +91,6 @@ class ColorGrid:
 					matchList.append(matchStack)
 			return matchList
 
-
 		def getMatches(self, minMatchLength):
 			return self.getHorizontalMatches(minMatchLength) + self.getVerticalMatches(minMatchLength)
 
@@ -130,7 +129,7 @@ class ColorGrid:
 
 		def spawnNewCells(self, emptyCells):
 			for cell in emptyCells:
-				self.grid[cell[0]][cell[1]] = BaseBlock(random.randint(1,4),(cell[0] * (cellWidth + padding), cell[1] * (cellHeight * padding)))
+				self.grid[cell[0]][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), cell[0] * (cellHeight + padding)))
 
 		def draw(self, screen, position, scale=1):
 			for row in range(len(self.grid)):
