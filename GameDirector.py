@@ -1,6 +1,12 @@
 import pygame
 import math
 
+from BlockModifiers import BlockModifiers
+
+cellHeight = 50
+cellWidth = 50
+padding = 10
+
 #base/template state
 class GameState:
    def __init__(self, gridManager):
@@ -30,19 +36,24 @@ class CheckState(GameState):
 class RemoveState(GameState):
    def __init__(self, gridManager, matches):
       self.matches = matches
+      self.matchDict = {}
+      for set in self.matches:
+         for cell in set:
+            self.matchDict[cell] = 1
       self.grid = gridManager
-      self.shrink = 1.0
+      self.shrinkScale = -.1
+      self.currScale = 1
    def update(self, inputs):
-      self.shrink -= 0.1
-      print(self.shrink)
-      if self.shrink <= 0.0:
+      if self.currScale <= 0:
          self.grid.removeMatches(self.matches)
          return FallState(self.grid)
+      else:
+         self.currScale += self.shrinkScale
       return self
    def draw(self, screen):
       gridPos = ((1280/2 - 300),(720/2 - 300))
       screen.fill((200,200,200))
-      self.grid.draw(screen, gridPos)
+      self.grid.draw(screen, gridPos, BlockModifiers.scaleBlock, self.matchDict, self.shrinkScale)
 
 #spawns new blocks into the grid
    #Spawn -> Fall (new blocks spawned)
@@ -77,9 +88,6 @@ class ReadyState(GameState):
       return self
 
 gravity = .01
-cellHeight = 50
-cellWidth = 50
-padding = 10
 #moves block down
    #Fall -> Check
 class FallState(GameState):

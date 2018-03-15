@@ -16,7 +16,9 @@ class BaseBlock:
 		self.color = color
 		self.isMoveable = True
 		self.baseWidth = 50
+		self.width = self.baseWidth
 		self.baseHeight = 50
+		self.height = self.baseHeight
 		self.position = position
 
 	def getColor(self):
@@ -27,10 +29,10 @@ class BaseBlock:
 		self.position = newPosition
 
 	#offset = (x,y) for uper left corner of the grid
-	def draw(self, screen, offset, scale=1):
+	def draw(self, screen, offset):
 		hexColor = colorDict[self.color].lstrip("#")
 		rgbColor = tuple(int(hexColor[i:i+2], 16) for i in (0, 2 ,4))
-		pygame.draw.rect(screen, rgbColor, (offset[0] + self.position[0],offset[1] + self.position[1], int(self.baseWidth*scale), int(self.baseHeight*scale)), 0)
+		pygame.draw.rect(screen, rgbColor, (offset[0] + self.position[0],offset[1] + self.position[1], self.width, self.height), 0)
 
 	def __str__(self):
 		return str(self.color)

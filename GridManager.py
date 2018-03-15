@@ -131,11 +131,16 @@ class ColorGrid:
 			for cell in emptyCells:
 				self.grid[cell[0]][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), cell[0] * (cellHeight + padding)))
 
-		def draw(self, screen, position, scale=1):
+		#modBlocks - a dictionary of block coordinates (row,col) for blocks that are rendered with...
+		#modifier - a function that is called on each block (see above) that alters how it is rendered
+		def draw(self, screen, position, modifier=None, modBlockCoords=None, *modifierParams):
 			for row in range(len(self.grid)):
 				for col in range(len(self.grid)):
 					if self.grid[row][col] != None:
-						self.grid[row][col].draw(screen, position, scale)
+						if modifier != None:
+							if modBlockCoords.get((row,col)) != None:
+								modifier(self.grid[row][col], *modifierParams)
+						self.grid[row][col].draw(screen, position)
 			cursorX = self.cursor.position[1] * (cellWidth + padding) - (abs(cellWidth - self.cursor.width))/2
 			cursorY = self.cursor.position[0] * (cellHeight + padding) - (abs(cellHeight - self.cursor.height))/2
 			self.cursor.draw(screen, (position[0] + cursorX, position[1] + cursorY))
