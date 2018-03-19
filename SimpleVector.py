@@ -41,46 +41,55 @@ class SimplePoly:
 	def __init__(self, points):
 		self.matrix = SimpleMat(points)
 
+	def getPoints(self):
+		points = []
+		for point in self.matrix.cols:
+			points.append(point)
+		return points
+
 	#factor - float -1 -> 1 
 	def scale(self, factor):
 		if factor > 1 or factor < -1:
 			raise ValueError("Scale factor must be -1 (-100%) to 1 (+100%")
 		transMat = SimpleMat([(1+factor, 0), (0, 1+factor)])
 		self.matrix = transMat * self.matrix
+		#self.updatePoints()
 
 	#factor - angle to be rotated around origin
-	def rotate(self, factor):
+	def rotateAroundOrigin(self, factor):
 		factor = factor % 360
 		factor = math.radians(factor)
 		transMat = SimpleMat([(math.cos(factor),math.sin(factor)), (-math.sin(factor),math.cos(factor))])
 		self.matrix = transMat * self.matrix
 
-	#factor - angle to be rotated
-	#Rotates IN PLACE ; around the center of the polygon
-	def rotateSelf(self, factor):
+	def rotateAroundPoint(self, point, factor):
+		for i in range(self.matrix.colCount):
+			self.matrix.cols[i] = (self.matrix.cols[i][0] - point[0], self.matrix.cols[i][1] - point[1])
+		self.rotateAroundOrigin(factor)
+		for i in range(self.matrix.colCount):
+			self.matrix.cols[i] = (self.matrix.cols[i][0] + point[0], self.matrix.cols[i][1] + point[1])
+
+	def getCenter(self):
 		centerX = 0
 		centerY = 0
 		for point in self.matrix.cols:
 			centerX += point[0]
 			centerY += point[1]
-		centerX /= len(self.matrix.cols)
-		centerY /= len(self.matrix.cols)
-		print(centerX, centerY)
-		tempPoints = []
-		for point in self.matrix.cols:
-			tempPoint = (point[0] - centerX, point[1] - centerY)
-			tempPoints.append(tempPoint)
-		tempPoly = SimplePoly(tempPoints)
-		#print(tempPoly)
-		tempPoly.rotate(factor)
-		#print(tempPoly)
-		self.matrix += tempPoly.matrix
+		centerX /= self.matrix.colCount
+		centerY /= self.matrix.colCount
+		return (centerX, centerY)		
+
+	def rotateSelf(self, factor):
+		self.rotateAroundPoint(self.getCenter(), factor)
+
+	def scaleInPlace(self, factor):
+		center = self.getCenter()
+		for i in range(self.matrix.colCount):
+			self.matrix.cols[i] = (self.matrix.cols[i][0] - center[0], self.matrix.cols[i][1] - center[1])
+		self.scale(factor)
+		for i in range(self.matrix.colCount):
+			self.matrix.cols[i] = (self.matrix.cols[i][0] + center[0], self.matrix.cols[i][1] + center[1])
+
 
 	def __str__(self):
 		return str(self.matrix)
-
-testPoly = SimplePoly([(0,0),(100,0),(100,100),(0,100)])
-print(testPoly)
-testPoly.rotateSelf(90)
-print(testPoly)
-
