@@ -47,19 +47,23 @@ class SimplePoly:
 			points.append(point)
 		return points
 
-	#factor - float -1 -> 1 
 	def scale(self, factor):
-		if factor > 1 or factor < -1:
-			raise ValueError("Scale factor must be -1 (-100%) to 1 (+100%")
-		transMat = SimpleMat([(1+factor, 0), (0, 1+factor)])
+		transMat = SimpleMat([(factor, 0), (0, factor)])
 		self.matrix = transMat * self.matrix
-		#self.updatePoints()
+
+	def shearX(self, factor):
+		transMat = SimpleMat([(1,0),(factor,1)])
+		self.matrix = transMat * self.matrix
+
+	def shearY(self, factor):
+		transMat = SimpleMat([(1,factor),(0,1)])
+		self.matrix = transMat * self.matrix
 
 	#factor - angle to be rotated around origin
 	def rotateAroundOrigin(self, factor):
 		factor = factor % 360
 		factor = math.radians(factor)
-		transMat = SimpleMat([(math.cos(factor),math.sin(factor)), (-math.sin(factor),math.cos(factor))])
+		transMat = SimpleMat([(math.cos(factor),-math.sin(factor)), (math.sin(factor),math.cos(factor))])
 		self.matrix = transMat * self.matrix
 
 	def rotateAroundPoint(self, point, factor):
@@ -90,6 +94,53 @@ class SimplePoly:
 		for i in range(self.matrix.colCount):
 			self.matrix.cols[i] = (self.matrix.cols[i][0] + center[0], self.matrix.cols[i][1] + center[1])
 
-
 	def __str__(self):
 		return str(self.matrix)
+
+import copy
+import math
+class BlockPoly:
+	#origin = TOP LEFT CORNER
+	def __init__(self, origin, width, height):
+		self.origin = origin
+		points = [origin,(origin[0]+width,origin[1]),(origin[0]+width,origin[1]+width),(origin[0],origin[1]+width)]
+		self.basePoly = SimplePoly(points)
+		self.currentPoly = SimplePoly(points)
+
+	def updateOrigin(self, newOrigin):
+		#print("old: " + str(self.origin) + " new: " + str(newOrigin))
+		basePoints = self.basePoly.getPoints()
+		for i in range(len(basePoints)):
+			basePoints[i] = (basePoints[i][0] - self.origin[0] + newOrigin[0], basePoints[i][1] - self.origin[1] + newOrigin[1])
+		currPoints = self.currentPoly.getPoints()
+		for i in range(len(currPoints)):
+			currPoints[i] = (currPoints[i][0] - self.origin[0] + newOrigin[0], currPoints[i][1] - self.origin[1], newOrigin[1])
+		self.basePoly = SimplePoly(basePoints)
+		self.currentPoly = SimplePoly(currPoints)
+		self.origin = newOrigin
+
+	def reset(self):
+		#self.currentPoly = copy.deepcopy(self.basePoly)
+		currPoints = self.currentPoly.getPoints()
+		currDistance = math.sqrt((currPoints[0][0] - currPoints[3][0])**2 + (currPoints[0][1] - currPoints[3][1])**2)
+		basePoints = self.basePoly.getPoints()
+		baseDistance = math.sqrt((basePoints[0][0] - basePoints[3][0])**2 + (basePoints[0][1] - basePoints[3][1])**2)
+		difference = 1 + (baseDistance - currDistance) / currDistance
+		self.scaleBy(difference)
+
+	def scaleTo(self, factor):
+		self.reset()
+		self.currentPoly.scaleInPlace(factor)
+
+	def scaleBy(self, factor):
+		self.currentPoly.scaleInPlace(factor)
+
+	def rotateTo(self, angle):
+		self.reset()
+		self.currentPoly.rotateSelf(angle)
+
+	def rotateBy(self, angle):
+		self.currentPoly.rotateSelf(angle)
+
+	def getPoints(self):
+		return self.currentPoly.getPoints()

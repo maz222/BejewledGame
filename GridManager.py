@@ -22,6 +22,7 @@ class ColorGrid:
 				for j in range(n):
 					cellPos = (j * (cellWidth + padding), i * (cellHeight + padding))
 					self.grid[i].append(BaseBlock(random.randint(1,4), cellPos))
+			self.n = n
 
 			#cursor set to (0,0) on the grid
 			self.cursor = Cursor(n,n,[n-1,0])
@@ -49,7 +50,7 @@ class ColorGrid:
 			self.grid[self.cursor.position[0]][self.cursor.position[1]] = None
 
 		def getVerticalMatches(self, minMatchLength):
-			matchList = []
+			matchSet = set([])
 			#check bottom -> top
 			for col in range(len(self.grid)):
 				matchStack = []
@@ -60,18 +61,21 @@ class ColorGrid:
 							matchStack.append((row,col))
 						else:
 							if len(matchStack) >= minMatchLength:
-								matchList.append(matchStack)
+								for cell in matchStack:
+									matchSet.add(cell)
 							matchStack = [(row, col)]
 					else:
 						if len(matchStack) >= minMatchLength:
-							matchList.append(matchStack)
+							for cell in matchStack:
+								matchSet.add(cell)
 						matchStack = []
 				if len(matchStack) >= minMatchLength:
-					matchList.append(matchStack)
-			return matchList
+					for cell in matchStack:
+						matchSet.add(cell)
+			return matchSet
 
 		def getHorizontalMatches(self, minMatchLength):			
-			matchList = []
+			matchSet = set([])
 			#check L -> R
 			for rowIndex, rowList in enumerate(self.grid):
 				matchStack = []
@@ -81,23 +85,25 @@ class ColorGrid:
 							matchStack.append((rowIndex, cellIndex))
 						else:
 							if len(matchStack) >= minMatchLength:
-								matchList.append(matchStack)
+								for cell in matchStack:
+									matchSet.add(cell)
 							matchStack = [(rowIndex, cellIndex)]
 					else:
 						if len(matchStack) >= minMatchLength:
-							matchList.append(matchStack)
+							for cell in matchStack:
+								matchSet.add(cell)
 						matchStack = []
 				if len(matchStack) >= minMatchLength:
-					matchList.append(matchStack)
-			return matchList
+					for cell in matchStack:
+						matchSet.add(cell)
+			return matchSet
 
 		def getMatches(self, minMatchLength):
-			return self.getHorizontalMatches(minMatchLength) + self.getVerticalMatches(minMatchLength)
+			return self.getHorizontalMatches(minMatchLength).union(self.getVerticalMatches(minMatchLength))
 
 		def removeMatches(self, matchList):
-			for matchSet in matchList:
-				for matchCell in matchSet:
-					self.grid[matchCell[0]][matchCell[1]] = None
+			for matchCell in matchList:
+				self.grid[matchCell[0]][matchCell[1]] = None
 
 		def moveCellsDown(self):
 			colList = []
@@ -131,15 +137,18 @@ class ColorGrid:
 			for cell in emptyCells:
 				self.grid[cell[0]][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), cell[0] * (cellHeight + padding)))
 
-		#modBlocks - a dictionary of block coordinates (row,col) for blocks that are rendered with...
-		#modifier - a function that is called on each block (see above) that alters how it is rendered
-		def draw(self, screen, position, modifier=None, modBlockCoords=None, *modifierParams):
+		def scaleCells(self, cellList, factor):
+			for index in cellList:
+				self.grid[index[0]][index[1]].poly.scaleTo(factor)
+
+		def rotateCells(self, cellList, factor):
+			for index in cellList:
+				self.grid[index[0]][index[1]].poly.rotateBy(factor)
+
+		def draw(self, screen, position):
 			for row in range(len(self.grid)):
 				for col in range(len(self.grid)):
 					if self.grid[row][col] != None:
-						if modifier != None:
-							if modBlockCoords.get((row,col)) != None:
-								modifier(self.grid[row][col], *modifierParams)
 						self.grid[row][col].draw(screen, position)
 			cursorX = self.cursor.position[1] * (cellWidth + padding) - (abs(cellWidth - self.cursor.width))/2
 			cursorY = self.cursor.position[0] * (cellHeight + padding) - (abs(cellHeight - self.cursor.height))/2

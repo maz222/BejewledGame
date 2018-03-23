@@ -13,8 +13,7 @@ class GameState:
       self.grid = gridManager
    def update(self, inputs):
       pass
-   def draw(self, screen, scale=1):
-      gridPos = ((1280/2 - 300),(720/2 - 300))
+   def draw(self, screen, gridPos):
       screen.fill((200,200,200))
       self.grid.draw(screen, gridPos)
 
@@ -36,12 +35,8 @@ class CheckState(GameState):
 class RemoveState(GameState):
    def __init__(self, gridManager, matches):
       self.matches = matches
-      self.matchDict = {}
-      for set in self.matches:
-         for cell in set:
-            self.matchDict[cell] = 1
       self.grid = gridManager
-      self.shrinkScale = -.1
+      self.shrinkScale = -.02
       self.currScale = 1
    def update(self, inputs):
       if self.currScale <= 0:
@@ -49,11 +44,12 @@ class RemoveState(GameState):
          return FallState(self.grid)
       else:
          self.currScale += self.shrinkScale
+         self.grid.rotateCells(self.matches, 5)
+         self.grid.scaleCells(self.matches, self.currScale)
       return self
-   def draw(self, screen):
-      gridPos = ((1280/2 - 300),(720/2 - 300))
+   def draw(self, screen, gridPos):
       screen.fill((200,200,200))
-      self.grid.draw(screen, gridPos, BlockModifiers.scaleBlock, self.matchDict, self.shrinkScale)
+      self.grid.draw(screen, gridPos)
 
 #spawns new blocks into the grid
    #Spawn -> Fall (new blocks spawned)
@@ -87,7 +83,7 @@ class ReadyState(GameState):
                return FallState(self.grid)
       return self
 
-gravity = .01
+gravity = .02
 #moves block down
    #Fall -> Check
 class FallState(GameState):
@@ -103,18 +99,19 @@ class FallState(GameState):
       for col in list(self.toMove):
          for pair in list(col):
             block = self.grid.getCell(pair[0])
-            targetPosition = (pair[1][1]*(cellWidth+padding), pair[1][0]*(cellHeight+padding))
+            targetPosition = (pair[1][1] * 60, pair[1][0] * 60)
+            #print("old: " + str(block.position) + " new: " + str(targetPosition))
             oldDistance = math.sqrt((targetPosition[0]-block.position[0])**2 + (targetPosition[1]-block.position[1])**2)
             xSlope = targetPosition[0] - block.position[0]
             ySlope = targetPosition[1] - block.position[1]
             newPos = (block.position[0] + self.blockSpeed*xSlope, block.position[1] + self.blockSpeed*ySlope)
-            newDistance = math.sqrt((targetPosition[0]-newPos[0])**2 + (targetPosition[1]-newPos[1])**2)
+            #newDistance = math.sqrt((targetPosition[0]-newPos[0])**2 + (targetPosition[1]-newPos[1])**2)
             # done moving
             if xSlope == 0 and ySlope == 0:
                self.grid.swapCells(pair[0],pair[1])
                col.remove(pair)
             else:
-               block.position = newPos
+               block.updatePosition(newPos)
          if len(col) == 0:
             self.toMove.remove(col)
       return self
@@ -128,4 +125,5 @@ class GameDirector:
    def update(self, inputs):
       self.currentState = self.currentState.update(inputs)
    def draw(self, screen):
-      self.currentState.draw(screen)
+      gridPos = ((1280/2 - self.grid.n*60/2),(720/2 - self.grid.n*60/2))
+      self.currentState.draw(screen, gridPos)
