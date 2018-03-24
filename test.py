@@ -6,12 +6,12 @@ from GameDirector import GameDirector
 import pygame
 
 grid = ColorGrid(10)
-
+empty = grid.getEmptyCells()
+print(grid)
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 done = False
 clock = pygame.time.Clock()
-print(grid)
 
 director = GameDirector(grid)
 

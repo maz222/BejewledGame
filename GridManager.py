@@ -15,14 +15,20 @@ class ColorGrid:
 
 		# (n) by (n) grid
 		def __init__(self,n):
-
 			self.grid = []
+			#add second, empty grid
 			for i in range(n):
 				self.grid.append([])
 				for j in range(n):
-					cellPos = (j * (cellWidth + padding), i * (cellHeight + padding))
-					self.grid[i].append(BaseBlock(random.randint(1,4), cellPos))
+					self.grid[i].append(None)
+			#create grid filled with blocks
+			for i in range(n):
+				self.grid.append([])
+				for j in range(n):
+					cellPos = (j * (cellWidth + padding), (n+i) * (cellHeight + padding))
+					self.grid[n+i].append(BaseBlock(random.randint(1,4), cellPos))
 			self.n = n
+
 
 			#cursor set to (0,0) on the grid
 			self.cursor = Cursor(n,n,[n-1,0])
@@ -47,14 +53,15 @@ class ColorGrid:
 			self.cursor.move(key)
 
 		def deleteBlock(self):
-			self.grid[self.cursor.position[0]][self.cursor.position[1]] = None
+			self.grid[self.cursor.position[0]+self.n][self.cursor.position[1]] = None
 
 		def getVerticalMatches(self, minMatchLength):
 			matchSet = set([])
 			#check bottom -> top
-			for col in range(len(self.grid)):
+			for col in range(self.n):
 				matchStack = []
-				for row in range(len(self.grid)):
+				#only check the bottom grid (n/2)
+				for row in range(self.n-1,self.n*2,1):
 					cell = self.grid[row][col]
 					if cell != None:
 						if len(matchStack) == 0 or cell.getColor() == self.grid[matchStack[0][0]][matchStack[0][1]].getColor():
@@ -77,7 +84,9 @@ class ColorGrid:
 		def getHorizontalMatches(self, minMatchLength):			
 			matchSet = set([])
 			#check L -> R
-			for rowIndex, rowList in enumerate(self.grid):
+			#only check the bottom grid (n/2)
+			for rowIndex in range(self.n-1,self.n*2,1):
+				rowList = self.grid[rowIndex]
 				matchStack = []
 				for cellIndex, cell in enumerate(rowList):
 					if cell != None:
@@ -107,10 +116,10 @@ class ColorGrid:
 
 		def moveCellsDown(self):
 			colList = []
-			for col in range(len(self.grid)):
+			for col in range(self.n):
 				emptyStack = []
 				toMove = []
-				for row in range(len(self.grid)-1,-1,-1):
+				for row in range(self.n*2-1,-1,-1):
 					if self.grid[row][col] == None:
 						emptyStack.append((row,col))
 					else:
@@ -127,15 +136,17 @@ class ColorGrid:
 
 		def getEmptyCells(self):
 			emptyCellList = []
-			for row in range(len(self.grid)):
-				for col in range(len(self.grid)):
+			for col in range(self.n):
+				for row in range(self.n,self.n*2,1):
 					if self.grid[row][col] == None:
 						emptyCellList.append((row,col))
+					else:
+						break
 			return emptyCellList
 
 		def spawnNewCells(self, emptyCells):
 			for cell in emptyCells:
-				self.grid[cell[0]][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), cell[0] * (cellHeight + padding)))
+				self.grid[cell[0]-self.n][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), (cell[0]-self.n) * (cellHeight + padding)))
 
 		def scaleCells(self, cellList, factor):
 			for index in cellList:
@@ -146,12 +157,12 @@ class ColorGrid:
 				self.grid[index[0]][index[1]].poly.rotateBy(factor)
 
 		def draw(self, screen, position):
-			for row in range(len(self.grid)):
-				for col in range(len(self.grid)):
+			for row in range(self.n*2):
+				for col in range(self.n):
 					if self.grid[row][col] != None:
 						self.grid[row][col].draw(screen, position)
 			cursorX = self.cursor.position[1] * (cellWidth + padding) - (abs(cellWidth - self.cursor.width))/2
-			cursorY = self.cursor.position[0] * (cellHeight + padding) - (abs(cellHeight - self.cursor.height))/2
+			cursorY = (self.cursor.position[0] + self.n) * (cellHeight + padding) - (abs(cellHeight - self.cursor.height))/2
 			self.cursor.draw(screen, (position[0] + cursorX, position[1] + cursorY))
 
 		def __str__(self):

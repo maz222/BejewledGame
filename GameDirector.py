@@ -59,8 +59,8 @@ class SpawnState(GameState):
       emptyCells = self.grid.getEmptyCells()
       if len(emptyCells) > 0:
          self.grid.spawnNewCells(emptyCells)
-         #return FallState(self.grid)
-         return CheckState(self.grid)
+         return FallState(self.grid)
+         #return CheckState(self.grid)
       else:
          return ReadyState(self.grid)
 
@@ -76,7 +76,7 @@ class ReadyState(GameState):
             if event.key in moveKeys:
                self.grid.moveCursor(event.key)
             elif event.key == pygame.K_r:
-               return SpawnState(self.grid)
+               print(self.grid)
             #delete a block from the grid, causing other blocks to fall
             elif event.key == pygame.K_DELETE:
                self.grid.deleteBlock()
@@ -100,7 +100,6 @@ class FallState(GameState):
          for pair in list(col):
             block = self.grid.getCell(pair[0])
             targetPosition = (pair[1][1] * 60, pair[1][0] * 60)
-            #print("old: " + str(block.position) + " new: " + str(targetPosition))
             oldDistance = math.sqrt((targetPosition[0]-block.position[0])**2 + (targetPosition[1]-block.position[1])**2)
             xSlope = targetPosition[0] - block.position[0]
             ySlope = targetPosition[1] - block.position[1]
@@ -125,5 +124,5 @@ class GameDirector:
    def update(self, inputs):
       self.currentState = self.currentState.update(inputs)
    def draw(self, screen):
-      gridPos = ((1280/2 - self.grid.n*60/2),(720/2 - self.grid.n*60/2))
+      gridPos = ((1280/2 - self.grid.n*60/2),(720/2 - self.grid.n*60 - self.grid.n*60/2))
       self.currentState.draw(screen, gridPos)

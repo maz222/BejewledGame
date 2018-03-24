@@ -16,13 +16,13 @@ class Cursor:
 		self.position[1] = (self.position[1] - 1) % self.horizontalN
 
 	def moveRight(self):
-		self.position[1] = ((self.position[1] + 1) % self.horizontalN)
+		self.position[1] = (self.position[1] + 1) % self.horizontalN
 
 	def moveUp(self):
-		self.position[0] = ((self.position[0] - 1) % self.verticalN) 
+		self.position[0] = (self.position[0] - 1) % self.verticalN
 
 	def moveDown(self):
-		self.position[0] = ((self.position[0] + 1) % self.verticalN)
+		self.position[0] = (self.position[0] + 1) % self.verticalN
 
 	def move(self, key):
 		if key == pygame.K_UP:
