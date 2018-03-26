@@ -5,7 +5,7 @@ from GameDirector import GameDirector
 
 import pygame
 
-grid = ColorGrid(10)
+grid = ColorGrid(7)
 empty = grid.getEmptyCells()
 print(grid)
 pygame.init()

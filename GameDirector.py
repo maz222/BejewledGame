@@ -12,7 +12,12 @@ class GameState:
    def __init__(self, gridManager):
       self.grid = gridManager
    def update(self, inputs):
-      pass
+      moveKeys = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
+      for event in inputs:
+         if event.type == pygame.KEYDOWN:
+            #move the target cursor around
+            if event.key in moveKeys:
+               self.grid.moveCursor(event.key)
    def draw(self, screen, gridPos):
       screen.fill((200,200,200))
       self.grid.draw(screen, gridPos)
@@ -23,6 +28,7 @@ class GameState:
    #     -> Spawn (no matches)
 class CheckState(GameState):
    def update(self, inputs):
+      super().update(inputs)
       matches = self.grid.getMatches(3)
       if len(matches) > 0:
          return RemoveState(self.grid, matches)
@@ -39,6 +45,7 @@ class RemoveState(GameState):
       self.shrinkScale = -.02
       self.currScale = 1
    def update(self, inputs):
+      super().update(inputs)
       if self.currScale <= 0:
          self.grid.removeMatches(self.matches)
          return FallState(self.grid)
@@ -56,6 +63,7 @@ class RemoveState(GameState):
    #      -> Ready (no new blocks spawned)
 class SpawnState(GameState):
    def update(self, inputs):
+      super().update(inputs)
       emptyCells = self.grid.getEmptyCells()
       if len(emptyCells) > 0:
          self.grid.spawnNewCells(emptyCells)
@@ -92,6 +100,7 @@ class FallState(GameState):
       self.toMove = self.grid.moveCellsDown()
       self.blockSpeed = gravity
    def update(self, inputs):
+      super().update(inputs)
       self.blockSpeed += gravity
       if self.toMove == None or len(self.toMove) == 0:
          return CheckState(self.grid)
