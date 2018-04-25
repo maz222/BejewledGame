@@ -29,13 +29,28 @@ class ColorGrid:
 					self.grid[n+i].append(BaseBlock(random.randint(1,4), cellPos))
 			self.n = n
 
-
 			#cursor set to (0,0) on the grid
 			self.cursor = Cursor(n,n,[n-1,0])
 
+		def rotateClock(self):
+			for i in range(3):
+				self.rotateCounter()			
+
+		def rotateCounter(self):
+			N = self.n
+			for x in range(0, int(N/2)):
+				for y in range(x, N-x-1):
+					top = ((x+N),y)
+					right = ((y+N),(N-1-x))
+					bottom = ((N-1-x+N),(N-1-y))
+					left = ((N-1-y+N),(x))
+					self.swapCells(top, left)
+					self.swapCells(top, bottom)
+					self.swapCells(top, right)
 		#coord - (row,col)
 		def getCell(self, coord):
 			return self.grid[coord[0]][coord[1]]
+
 
 		#A / B = (row,col) of desired cells
 		def swapCells(self, A, B):

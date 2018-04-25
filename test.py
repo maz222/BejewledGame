@@ -15,6 +15,10 @@ clock = pygame.time.Clock()
 
 director = GameDirector(grid)
 
+scoreFont = pygame.font.Font(None, 72)
+scoreCount = 0
+scoreLabel = scoreFont.render(str(scoreCount), True, (0,0,0))
+
 while not done:
     events = pygame.event.get()
     for event in events:
@@ -22,5 +26,6 @@ while not done:
             done = True
     director.update(events)
     director.draw(screen)
+    screen.blit(scoreLabel, (1280/2-scoreLabel.get_width()/2,720/2-scoreLabel.get_height()/2+250))
     pygame.display.flip()
     clock.tick(60)

@@ -22,6 +22,17 @@ class GameState:
       screen.fill((200,200,200))
       self.grid.draw(screen, gridPos)
 
+class RotateState(GameState):
+   def __init__(self, gridManager, clockWise=True):
+      self.grid = gridManager
+      #rotate
+      if clockWise:
+         self.grid.rotateClock()
+      else:
+         self.grid.rotateCounter()
+   def update(self, inputs):
+      return CheckState(self.grid)
+
 
 #checks the grid for matches
    #Check -> Remove (matches found)
@@ -42,7 +53,7 @@ class RemoveState(GameState):
    def __init__(self, gridManager, matches):
       self.matches = matches
       self.grid = gridManager
-      self.shrinkScale = -.02
+      self.shrinkScale = -.04
       self.currScale = 1
    def update(self, inputs):
       super().update(inputs)
@@ -51,7 +62,7 @@ class RemoveState(GameState):
          return FallState(self.grid)
       else:
          self.currScale += self.shrinkScale
-         self.grid.rotateCells(self.matches, 5)
+         self.grid.rotateCells(self.matches, 10)
          self.grid.scaleCells(self.matches, self.currScale)
       return self
    def draw(self, screen, gridPos):
@@ -80,6 +91,15 @@ class ReadyState(GameState):
       moveKeys = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
       for event in inputs:
          if event.type == pygame.KEYDOWN:
+            #check for rotations
+            if event.key == pygame.K_LEFT:
+               keys = pygame.key.get_pressed()
+               if keys[pygame.K_RSHIFT] or keys[pygame.K_LSHIFT]:
+                  return RotateState(self.grid, False)
+            elif event.key == pygame.K_RIGHT:
+               keys = pygame.key.get_pressed()
+               if keys[pygame.K_RSHIFT] or keys[pygame.K_LSHIFT]:
+                  return RotateState(self.grid, True)
             #move the target cursor around
             if event.key in moveKeys:
                self.grid.moveCursor(event.key)
@@ -91,7 +111,7 @@ class ReadyState(GameState):
                return FallState(self.grid)
       return self
 
-gravity = .02
+gravity = .04
 #moves block down
    #Fall -> Check
 class FallState(GameState):
