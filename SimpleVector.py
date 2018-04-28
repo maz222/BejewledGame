@@ -20,6 +20,8 @@ class SimpleMat:
 
 	def __mul__(self,matrix):
 		if self.colCount != matrix.rowCount:
+			print(self)
+			print(matrix)
 			raise ValueError("Wrong matrix dimensions!")
 		temp = []
 		for col in matrix.cols:
@@ -141,6 +143,9 @@ class BlockPoly:
 
 	def rotateBy(self, angle):
 		self.currentPoly.rotateSelf(angle)
+
+	def rotateAroundPoint(self, point, angle):
+		self.currentPoly.rotateAroundPoint(point, angle)
 
 	def getPoints(self):
 		return self.currentPoly.getPoints()

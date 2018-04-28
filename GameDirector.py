@@ -25,13 +25,21 @@ class GameState:
 class RotateState(GameState):
    def __init__(self, gridManager, clockWise=True):
       self.grid = gridManager
-      #rotate
-      if clockWise:
-         self.grid.rotateClock()
-      else:
-         self.grid.rotateCounter()
+      self.totalAngle = 0
+      self.clockWise = clockWise
    def update(self, inputs):
-      return CheckState(self.grid)
+      if self.clockWise:
+         self.grid.rotateGrid(1)
+      else:
+         self.grid.rotateGrid(-1)
+      self.totalAngle += 1
+      if self.totalAngle >= 90:
+         if self.clockWise:
+            self.grid.rotateClock()
+         else:
+            self.grid.rotateCounter()
+         return CheckState(self.grid)
+      return self
 
 
 #checks the grid for matches
@@ -129,10 +137,10 @@ class FallState(GameState):
          for pair in list(col):
             block = self.grid.getCell(pair[0])
             targetPosition = (pair[1][1] * 60, pair[1][0] * 60)
-            oldDistance = math.sqrt((targetPosition[0]-block.position[0])**2 + (targetPosition[1]-block.position[1])**2)
-            xSlope = targetPosition[0] - block.position[0]
-            ySlope = targetPosition[1] - block.position[1]
-            newPos = (block.position[0] + self.blockSpeed*xSlope, block.position[1] + self.blockSpeed*ySlope)
+            oldDistance = math.sqrt((targetPosition[0]-block.getPosition()[0])**2 + (targetPosition[1]-block.getPosition()[1])**2)
+            xSlope = targetPosition[0] - block.getPosition()[0]
+            ySlope = targetPosition[1] - block.getPosition()[1]
+            newPos = (block.getPosition()[0] + self.blockSpeed*xSlope, block.getPosition()[1] + self.blockSpeed*ySlope)
             #newDistance = math.sqrt((targetPosition[0]-newPos[0])**2 + (targetPosition[1]-newPos[1])**2)
             # done moving
             if xSlope == 0 and ySlope == 0:

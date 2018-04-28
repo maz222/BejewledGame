@@ -28,6 +28,7 @@ class ColorGrid:
 					cellPos = (j * (cellWidth + padding), (n+i) * (cellHeight + padding))
 					self.grid[n+i].append(BaseBlock(random.randint(1,4), cellPos))
 			self.n = n
+			self.center = (n*(cellWidth+padding), n*(cellHeight+padding)* 2)
 
 			#cursor set to (0,0) on the grid
 			self.cursor = Cursor(n,n,[n-1,0])
@@ -165,11 +166,16 @@ class ColorGrid:
 
 		def scaleCells(self, cellList, factor):
 			for index in cellList:
-				self.grid[index[0]][index[1]].poly.scaleTo(factor)
+				self.grid[index[0]][index[1]].scale(factor)
 
 		def rotateCells(self, cellList, factor):
 			for index in cellList:
-				self.grid[index[0]][index[1]].poly.rotateBy(factor)
+				self.grid[index[0]][index[1]].rotateInPlace(factor)
+
+		def rotateGrid(self, factor):
+			for row in self.grid:
+				for cell in row:
+					if cell != None: cell.rotateAroundPoint(factor, self.center)
 
 		def draw(self, screen, position):
 			for row in range(self.n*2):

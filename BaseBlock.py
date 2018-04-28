@@ -1,6 +1,8 @@
 import pygame
+import math
 
 from SimpleVector import BlockPoly
+from SimpleVector import SimpleMat
 
 colorDict = {1:"#B3411E", 2:"#90B31E", 3:"#1E90B3", 4:"#411EB3"}
 
@@ -17,16 +19,37 @@ class BaseBlock:
 	def __init__(self, color, position, width=50, height=50):
 		self.color = color
 		self.isMoveable = True
-		self.position = position
-		self.poly = BlockPoly(self.position, width, height)
+		self.position = SimpleMat([position])
+		self.poly = BlockPoly(position, width, height)
 
 	def getColor(self):
 		return self.color
 
+	def getPosition(self):
+		return self.position.cols[0]
+
 	def updatePosition(self, newPosition):
-		self.position = newPosition
-		self.poly = BlockPoly(self.position, 50, 50)
+		self.position = SimpleMat([newPosition])
+		self.poly = BlockPoly(self.position.cols[0], 50, 50)
 		#self.poly.updateOrigin(self.position)
+
+	def rotateAroundPoint(self, factor, point):
+		point = (-point[0],-point[1])
+		self.position += SimpleMat([point])
+		factor = factor % 360
+		factor = math.radians(factor)
+		transMat = SimpleMat([(math.cos(factor),-math.sin(factor)),(math.sin(factor),math.cos(factor))])
+		self.position = transMat * self.position
+		point = (-point[0],-point[1])
+		#update position
+		self.position += SimpleMat([point])
+		self.poly = BlockPoly(self.position.cols[0], 50, 50)
+
+	def rotateInPlace(self, factor):
+		self.poly.rotateBy(factor)
+
+	def scale(self, factor):
+		self.poly.scaleTo(factor)
 
 	#offset = (x,y) for uper left corner of the grid
 	def draw(self, screen, offset):
