@@ -9,73 +9,72 @@ padding = 10
 
 #base/template state
 class GameState:
-   def __init__(self, gridManager):
-      self.grid = gridManager
+   def __init__(self, gameData):
+      self.gameData = gameData
    def update(self, inputs):
+      grid = self.gameData["grid"]
       moveKeys = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
       for event in inputs:
          if event.type == pygame.KEYDOWN:
             #move the target cursor around
             if event.key in moveKeys:
-               self.grid.moveCursor(event.key)
+               grid.moveCursor(event.key)
    def draw(self, screen, gridPos):
       screen.fill((200,200,200))
-      self.grid.draw(screen, gridPos)
+      self.gameData["grid"].draw(screen, gridPos)
 
 class RotateState(GameState):
-   def __init__(self, gridManager, clockWise=True):
-      self.grid = gridManager
+   def __init__(self, gameData, clockWise=True):
+      self.gameData = gameData
       self.totalAngle = 0
       self.clockWise = clockWise
    def update(self, inputs):
+      grid = self.gameData["grid"]
       if self.clockWise:
-         self.grid.rotateGrid(1)
+         grid.rotateGrid(2)
       else:
-         self.grid.rotateGrid(-1)
-      self.totalAngle += 1
+         grid.rotateGrid(-2)
+      self.totalAngle += 2
       if self.totalAngle >= 90:
-         if self.clockWise:
-            self.grid.rotateClock()
+         if not self.clockWise:
+            grid.rotateClock()
          else:
-            self.grid.rotateCounter()
-         return CheckState(self.grid)
+            grid.rotateCounter()
+         return CheckState(self.gameData)
       return self
-
 
 #checks the grid for matches
    #Check -> Remove (matches found)
-   #     -> Spawn (no matches)
+   #      -> Spawn (no matches)
 class CheckState(GameState):
    def update(self, inputs):
       super().update(inputs)
-      matches = self.grid.getMatches(3)
+      matches = self.gameData["grid"].getMatches(3)
       if len(matches) > 0:
-         return RemoveState(self.grid, matches)
+         self.gameData["score"].addScore(len(matches))
+         return RemoveState(self.gameData, matches)
       else:
-         return SpawnState(self.grid)
-         #return ReadyState(self.grid)
+         return SpawnState(self.gameData)
 
 #removes matches from the grid
    #Remove -> Fall
 class RemoveState(GameState):
-   def __init__(self, gridManager, matches):
+   def __init__(self, gameData, matches):
       self.matches = matches
-      self.grid = gridManager
+      self.gameData = gameData
       self.shrinkScale = -.04
       self.currScale = 1
    def update(self, inputs):
       super().update(inputs)
+      grid = self.gameData["grid"]
       if self.currScale <= 0:
-         self.grid.removeMatches(self.matches)
-         return FallState(self.grid)
+         grid.removeMatches(self.matches)
+         return FallState(self.gameData)
       else:
          self.currScale += self.shrinkScale
-         self.grid.rotateCells(self.matches, 10)
-         self.grid.scaleCells(self.matches, self.currScale)
+         grid.rotateCells(self.matches, 10)
+         grid.scaleCells(self.matches, self.currScale)
       return self
-   def draw(self, screen, gridPos):
-      screen.fill((200,200,200))
-      self.grid.draw(screen, gridPos)
 
 #spawns new blocks into the grid
    #Spawn -> Fall (new blocks spawned)
@@ -83,13 +82,12 @@ class RemoveState(GameState):
 class SpawnState(GameState):
    def update(self, inputs):
       super().update(inputs)
-      emptyCells = self.grid.getEmptyCells()
+      emptyCells = self.gameData["grid"].getEmptyCells()
       if len(emptyCells) > 0:
-         self.grid.spawnNewCells(emptyCells)
-         return FallState(self.grid)
-         #return CheckState(self.grid)
+         self.gameData["grid"].spawnNewCells(emptyCells)
+         return FallState(self.gameData)
       else:
-         return ReadyState(self.grid)
+         return ReadyState(self.gameData)
 
 #main state - handles user input when game is "ready" to play
    #Ready -> Ready (no action taken)
@@ -103,39 +101,39 @@ class ReadyState(GameState):
             if event.key == pygame.K_LEFT:
                keys = pygame.key.get_pressed()
                if keys[pygame.K_RSHIFT] or keys[pygame.K_LSHIFT]:
-                  return RotateState(self.grid, False)
+                  return RotateState(self.gameData, False)
             elif event.key == pygame.K_RIGHT:
                keys = pygame.key.get_pressed()
                if keys[pygame.K_RSHIFT] or keys[pygame.K_LSHIFT]:
-                  return RotateState(self.grid, True)
+                  return RotateState(self.gameData, True)
             #move the target cursor around
             if event.key in moveKeys:
-               self.grid.moveCursor(event.key)
+               self.gameData["grid"].moveCursor(event.key)
             elif event.key == pygame.K_r:
-               print(self.grid)
+               print(self.gameData["grid"])
             #delete a block from the grid, causing other blocks to fall
             elif event.key == pygame.K_DELETE:
-               self.grid.deleteBlock()
-               return FallState(self.grid)
+               self.gameData["grid"].deleteBlock()
+               return FallState(self.gameData)
       return self
 
 gravity = .04
 #moves block down
    #Fall -> Check
 class FallState(GameState):
-   def __init__(self, gridManager):
-      self.grid = gridManager
-      self.toMove = self.grid.moveCellsDown()
+   def __init__(self, gameData):
+      self.gameData = gameData
+      self.toMove = self.gameData["grid"].moveCellsDown()
       self.blockSpeed = gravity
    def update(self, inputs):
       super().update(inputs)
       self.blockSpeed += gravity
       if self.toMove == None or len(self.toMove) == 0:
-         return CheckState(self.grid)
+         return CheckState(self.gameData)
       #iterate over a copy of the list so that you can alter/remove from it
       for col in list(self.toMove):
          for pair in list(col):
-            block = self.grid.getCell(pair[0])
+            block = self.gameData["grid"].getCell(pair[0])
             targetPosition = (pair[1][1] * 60, pair[1][0] * 60)
             oldDistance = math.sqrt((targetPosition[0]-block.getPosition()[0])**2 + (targetPosition[1]-block.getPosition()[1])**2)
             xSlope = targetPosition[0] - block.getPosition()[0]
@@ -144,7 +142,7 @@ class FallState(GameState):
             #newDistance = math.sqrt((targetPosition[0]-newPos[0])**2 + (targetPosition[1]-newPos[1])**2)
             # done moving
             if xSlope == 0 and ySlope == 0:
-               self.grid.swapCells(pair[0],pair[1])
+               self.gameData["grid"].swapCells(pair[0],pair[1])
                col.remove(pair)
             else:
                block.updatePosition(newPos)
@@ -154,12 +152,17 @@ class FallState(GameState):
 
 
 #state machine
+#gameData:
+   #["grid"]-gridManager
+   #["score"]-scoreKeeper
 class GameDirector:
-   def __init__(self, gridManager):
-      self.grid = gridManager
-      self.currentState = ReadyState(self.grid)
+   def __init__(self, gameData):
+      self.gameData = gameData
+      self.currentState = ReadyState(gameData)
    def update(self, inputs):
       self.currentState = self.currentState.update(inputs)
    def draw(self, screen):
-      gridPos = ((1280/2 - self.grid.n*60/2),(720/2 - self.grid.n*60 - self.grid.n*60/2))
+      grid = self.gameData["grid"]
+      gridPos = ((1280/2 - grid.n*60/2),(720/2 - grid.n*60 - grid.n*60/2))
       self.currentState.draw(screen, gridPos)
+      self.gameData["score"].draw(screen)
