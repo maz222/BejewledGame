@@ -3,6 +3,8 @@ import math
 
 from BlockModifiers import BlockModifiers
 
+
+
 cellHeight = 50
 cellWidth = 50
 padding = 10
@@ -150,13 +152,21 @@ class FallState(GameState):
             self.toMove.remove(col)
       return self
 
+from GridManager import ColorGrid
+from BaseBlock import BaseBlock
+from ScoreKeeper import ScoreKeeper
 
 #state machine
 #gameData:
    #["grid"]-gridManager
    #["score"]-scoreKeeper
 class GameDirector:
-   def __init__(self, gameData):
+   def __init__(self, gridSize=7):
+      score = ScoreKeeper()
+      grid = ColorGrid(gridSize)
+      gameData = {}
+      gameData["grid"] = grid
+      gameData["score"] = score
       self.gameData = gameData
       self.currentState = ReadyState(gameData)
    def update(self, inputs):
