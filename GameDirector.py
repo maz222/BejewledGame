@@ -1,9 +1,6 @@
 import pygame
 import math
 
-from BlockModifiers import BlockModifiers
-
-
 
 cellHeight = 50
 cellWidth = 50
@@ -111,8 +108,6 @@ class ReadyState(GameState):
             #move the target cursor around
             if event.key in moveKeys:
                self.gameData["grid"].moveCursor(event.key)
-            elif event.key == pygame.K_r:
-               print(self.gameData["grid"])
             #delete a block from the grid, causing other blocks to fall
             elif event.key == pygame.K_DELETE:
                self.gameData["grid"].deleteBlock()

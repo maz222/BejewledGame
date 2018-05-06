@@ -32,6 +32,25 @@ class IntroScene(GameScene):
 		screen.blit(label2, (center[0]-label2.get_width()/2,center[1]-label2.get_height()/2))
 		screen.blit(label3, (center[0]-label3.get_width()/2,center[1]-label2.get_height()+label3.get_height() + 20))
 
+#end game scene w/ score
+class EndScene(GameScene):
+	def update(self, inputs=None):
+		for event in inputs:
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_RETURN:
+					return PlayScene(self.gameData)
+	def draw(self, screen):
+		font = pygame.font.Font(None, 36)
+		font2 = pygame.font.Font(None, 64)
+		label1 = font.render("You Scored:", True, (0,0,0))
+		label2 = font2.render(str(self.gameData["score"].getScore()), True, (255,0,0))
+		label3 = font.render("Enter to play again", True, (0,0,0))
+		center = (1280/2,720/2)
+		screen.fill(200,200,200)
+		screen.blit(label1, (center[0]-label1.get_width()/2,center[1]-label2.get_height()-label1.get_height()/2 - 10))
+		screen.blit(label2, (center[0]-label2.get_width()/2,center[1]-label2.get_height()/2))
+		screen.blit(label3, (center[0]-label3.get_width()/2,center[1]-label2.get_height()+label3.get_height() + 20))
+
 #the actual game!
 class PlayScene(GameScene):
 	def __init__(self, gameData=None):
@@ -39,7 +58,6 @@ class PlayScene(GameScene):
 		self.director = GameDirector()
 	def update(self, inputs=None):
 		self.director.update(inputs)
-		return self
 	def draw(self, screen):
 		self.director.draw(screen)
 
