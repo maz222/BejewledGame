@@ -58,6 +58,7 @@ class PlayScene(GameScene):
 		self.director = GameDirector()
 	def update(self, inputs=None):
 		self.director.update(inputs)
+		return self
 	def draw(self, screen):
 		self.director.draw(screen)
 

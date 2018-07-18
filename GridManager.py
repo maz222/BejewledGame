@@ -35,7 +35,7 @@ class ColorGrid:
 
 		def rotateClock(self):
 			for i in range(3):
-				self.rotateCounter()			
+				self.rotateCounter()
 
 		def rotateCounter(self):
 			N = self.n
@@ -48,6 +48,7 @@ class ColorGrid:
 					self.swapCells(top, left)
 					self.swapCells(top, bottom)
 					self.swapCells(top, right)
+			self.rotateCursor(True)
 
 		#coord - (row,col)
 		def getCell(self, coord):
@@ -68,6 +69,46 @@ class ColorGrid:
 
 		def moveCursor(self, key):
 			self.cursor.move(key)
+
+		def rotateCursor(self, counter=True):
+			currPos = self.cursor.getPosition()
+			n = self.n
+			xMin = min(currPos[1], n - currPos[1] - 1)
+			yMin = min(currPos[0], n - currPos[0] - 1)
+			layer = min(xMin,yMin)
+			#top
+			if currPos[0] - layer == 0:
+				if counter == False:
+					#top - > right
+					self.cursor.setPosition((currPos[1],self.n-1-layer))
+				else:
+					#top -> left
+					self.cursor.setPosition((self.n-currPos[1]-1,layer))
+			#bottom
+			elif currPos[0] + layer == self.n - 1:
+				if counter == False:
+					#bottom -> left
+					self.cursor.setPosition((currPos[1],layer))
+				else:
+					#bottom -> right
+					self.cursor.setPosition((self.n-currPos[1]-1,self.n-1-layer))
+			else:
+				#left
+				if currPos[1] - layer == 0:
+					if counter == False:
+						#left -> top
+						self.cursor.setPosition((layer,self.n-currPos[0]-1))
+					else:
+						#left -> bottom
+						self.cursor.setPosition((self.n-1-layer,currPos[0]))
+				#right
+				else:
+					if counter == False:
+						#right -> bottom
+						self.cursor.setPosition((self.n-1-layer,self.n-currPos[0]-1))
+					else:
+						#right -> top
+						self.cursor.setPosition((layer,currPos[0]))
 
 		def deleteBlock(self):
 			self.grid[self.cursor.position[0]+self.n][self.cursor.position[1]] = None
@@ -174,22 +215,26 @@ class ColorGrid:
 				self.grid[index[0]][index[1]].rotateInPlace(factor)
 
 		def rotateGrid(self, factor):
+			#t = (self.center[0] - 30, self.n*60 + int(self.n/2)*60)
+			t = (self.center[0]-5,self.center[1]-5)
 			for row in self.grid:
 				for cell in row:
 					if cell != None: 
-						#cell.poly.rotateAroundPoint((85, 85+180),factor)
-						cell.poly.rotateAroundPoint(self.center,factor)
-						#cell.rotateAroundPoint(factor, self.center)
+						#cell.rotateInPlace(-factor)
+						cell.rotateAroundPoint(factor,t)
+			self.cursor.poly.rotateAroundPoint(t,factor)
 
-
-		def draw(self, screen, position):
+		def draw(self, screen, position, drawCursor=True):
 			for row in range(self.n*2):
 				for col in range(self.n):
 					if self.grid[row][col] != None:
 						self.grid[row][col].draw(screen, position)
 			cursorX = self.cursor.position[1] * (cellWidth + padding) - (abs(cellWidth - self.cursor.width))/2
 			cursorY = (self.cursor.position[0] + self.n) * (cellHeight + padding) - (abs(cellHeight - self.cursor.height))/2
-			self.cursor.draw(screen, (position[0] + cursorX, position[1] + cursorY))
+			#print(position)
+			if drawCursor:
+				#self.cursor.draw(screen, (position[0] + cursorX, position[1] + cursorY))
+				self.cursor.draw(screen, position)
 
 		def __str__(self):
 			outStr = ""

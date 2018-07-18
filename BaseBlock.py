@@ -34,16 +34,17 @@ class BaseBlock:
 		#self.poly.updateOrigin(self.position)
 
 	def rotateAroundPoint(self, factor, point):
-		point = (-point[0],-point[1])
-		self.position += SimpleMat([point])
-		factor = factor % 360
-		factor = math.radians(factor)
-		transMat = SimpleMat([(math.cos(factor),-math.sin(factor)),(math.sin(factor),math.cos(factor))])
-		self.position = transMat * self.position
-		point = (-point[0],-point[1])
+		#point = (-point[0],-point[1])
+		#self.position += SimpleMat([point])
+		#factor = factor % 360
+		#factor = math.radians(factor)
+		#transMat = SimpleMat([(math.cos(factor),-math.sin(factor)),(math.sin(factor),math.cos(factor))])
+		#self.position = transMat * self.position
+		#point = (-point[0],-point[1])
 		#update position
-		self.position += SimpleMat([point])
-		self.poly = BlockPoly(self.position.cols[0], 50, 50)
+		#self.position += SimpleMat([point])
+		#self.poly = BlockPoly(self.position.cols[0], 50, 50)
+		self.poly.rotateAroundPoint(point, factor)
 
 	def rotateInPlace(self, factor):
 		self.poly.rotateBy(factor)
@@ -52,7 +53,7 @@ class BaseBlock:
 		self.poly.scaleTo(factor)
 
 	#offset = (x,y) for uper left corner of the grid
-	def draw(self, screen, offset):
+	def draw(self, screen, offset=(0,0)):
 		hexColor = colorDict[self.color].lstrip("#")
 		rgbColor = tuple(int(hexColor[i:i+2], 16) for i in (0, 2 ,4))
 		points = self.poly.getPoints()

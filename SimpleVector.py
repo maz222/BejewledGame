@@ -130,6 +130,7 @@ class BlockPoly:
 		difference = 1 + (baseDistance - currDistance) / currDistance
 		self.scaleBy(difference)
 
+	#broken?
 	def scaleTo(self, factor):
 		self.reset()
 		self.currentPoly.scaleInPlace(factor)
@@ -137,6 +138,7 @@ class BlockPoly:
 	def scaleBy(self, factor):
 		self.currentPoly.scaleInPlace(factor)
 
+	#broken
 	def rotateTo(self, angle):
 		self.reset()
 		self.currentPoly.rotateSelf(angle)

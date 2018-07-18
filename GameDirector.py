@@ -18,9 +18,9 @@ class GameState:
             #move the target cursor around
             if event.key in moveKeys:
                grid.moveCursor(event.key)
-   def draw(self, screen, gridPos):
+   def draw(self, screen, gridPos, drawCursor=True):
       screen.fill((200,200,200))
-      self.gameData["grid"].draw(screen, gridPos)
+      self.gameData["grid"].draw(screen, gridPos, drawCursor)
 
 class RotateState(GameState):
    def __init__(self, gameData, clockWise=True):
@@ -28,12 +28,13 @@ class RotateState(GameState):
       self.totalAngle = 0
       self.clockWise = clockWise
    def update(self, inputs):
+      rAmt = 5
       grid = self.gameData["grid"]
       if self.clockWise:
-         grid.rotateGrid(2)
+         grid.rotateGrid(rAmt)
       else:
-         grid.rotateGrid(-2)
-      self.totalAngle += 2
+         grid.rotateGrid(-rAmt)
+      self.totalAngle += rAmt
       if self.totalAngle >= 90:
          if not self.clockWise:
             grid.rotateClock()
@@ -41,6 +42,9 @@ class RotateState(GameState):
             grid.rotateCounter()
          return CheckState(self.gameData)
       return self
+   def draw(self, screen, gridPos):
+      super().draw(screen, gridPos, True)
+
 
 #checks the grid for matches
    #Check -> Remove (matches found)
@@ -54,6 +58,8 @@ class CheckState(GameState):
          return RemoveState(self.gameData, matches)
       else:
          return SpawnState(self.gameData)
+   def draw(self, screen, gridPos):
+      super().draw(screen, gridPos, False)
 
 #removes matches from the grid
    #Remove -> Fall
@@ -74,6 +80,8 @@ class RemoveState(GameState):
          grid.rotateCells(self.matches, 10)
          grid.scaleCells(self.matches, self.currScale)
       return self
+   def draw(self, screen, gridPos):
+      super().draw(screen, gridPos, False)
 
 #spawns new blocks into the grid
    #Spawn -> Fall (new blocks spawned)
@@ -87,6 +95,8 @@ class SpawnState(GameState):
          return FallState(self.gameData)
       else:
          return ReadyState(self.gameData)
+   def draw(self, screen, gridPos):
+      super().draw(screen, gridPos, False)
 
 #main state - handles user input when game is "ready" to play
    #Ready -> Ready (no action taken)
@@ -146,6 +156,8 @@ class FallState(GameState):
          if len(col) == 0:
             self.toMove.remove(col)
       return self
+   def draw(self, screen, gridPos):
+      super().draw(screen, gridPos, False)
 
 from GridManager import ColorGrid
 from BaseBlock import BaseBlock
