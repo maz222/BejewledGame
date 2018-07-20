@@ -1,3 +1,5 @@
+from GameConstants import GameConstants
+
 import pygame
 import math
 
@@ -168,9 +170,9 @@ from ScoreKeeper import ScoreKeeper
    #["grid"]-gridManager
    #["score"]-scoreKeeper
 class GameDirector:
-   def __init__(self, gridSize=7):
+   def __init__(self):
       score = ScoreKeeper()
-      grid = ColorGrid(gridSize)
+      grid = ColorGrid(GameConstants.instance().get("gridSize"))
       gameData = {}
       gameData["grid"] = grid
       gameData["score"] = score
