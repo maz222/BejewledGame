@@ -1,6 +1,7 @@
 import pygame
 
 from SimpleVector import BlockPoly
+from GameConstants import GameConstants
 
 class Cursor:
 	#horizontalN - the length of the row the cursor can move through (eg: [][][] = 3)
@@ -13,12 +14,12 @@ class Cursor:
 		self.verticalN = verticalN
 		self.width = 60
 		self.height = 60
-		print(self.position)
+		#print(self.position)
 		self.updatePoly()
 
 	def updatePoly(self):
-		print("Cursor position: " + str(self.position))
-		pos = (self.position[1] * 60 - 5,self.position[0]*60 + 60*7 - 5)
+		#print("Cursor position: " + str(self.position))
+		pos = (self.position[1] * 60 - 5,self.position[0]*60 + 60*GameConstants.instance().get("gridSize") - 5)
 		self.poly = BlockPoly(pos,self.width,self.height)
 
 	def getPosition(self):
@@ -37,12 +38,14 @@ class Cursor:
 		self.updatePoly()
 
 	def moveUp(self):
-		self.position[0] = (self.position[0] - 1) % self.verticalN
-		self.updatePoly()
+		#self.position[0] = (self.position[0] - 1) % self.verticalN
+		#self.updatePoly()
+		print("nope")
 
 	def moveDown(self):
-		self.position[0] = (self.position[0] + 1) % self.verticalN
-		self.updatePoly()
+		#self.position[0] = (self.position[0] + 1) % self.verticalN
+		#self.updatePoly()
+		print("nope")
 
 	def move(self, key):
 		if key == pygame.K_UP:
@@ -55,11 +58,7 @@ class Cursor:
 			self.moveRight()
 
 	def draw(self, screen, position, scale=1):
-		#pygame.draw.rect(screen, (0,0,0), (position[0],position[1], self.width*scale, self.height*scale), 3 * scale)
-		
-		#print(position)
 		points = self.poly.getPoints()
 		for i in range(len(points)):
 			points[i] = (points[i][0] + position[0], points[i][1] + position[1])
-		#print(points)
 		pygame.draw.polygon(screen, (0,0,0), points, 3)

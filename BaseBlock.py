@@ -16,11 +16,13 @@ class BaseBlock:
 
 	#position = top left corner of block (in pixels) [x,y]
 	
-	def __init__(self, color, position, width=50, height=50):
+	def __init__(self, color, position, width, height):
 		self.color = color
 		self.isMoveable = True
 		self.position = SimpleMat([position])
 		self.poly = BlockPoly(position, width, height)
+		self.width = width
+		self.height = height
 
 	def getColor(self):
 		return self.color
@@ -30,8 +32,11 @@ class BaseBlock:
 
 	def updatePosition(self, newPosition):
 		self.position = SimpleMat([newPosition])
-		self.poly = BlockPoly(self.position.cols[0], 50, 50)
+		self.poly = BlockPoly(self.position.cols[0], self.width, self.height)
 		#self.poly.updateOrigin(self.position)
+
+	def rotate(self, clockWise):
+		return
 
 	def rotateAroundPoint(self, factor, point):
 		#point = (-point[0],-point[1])

@@ -69,11 +69,13 @@ class SimplePoly:
 		self.matrix = transMat * self.matrix
 
 	def rotateAroundPoint(self, point, factor):
-		for i in range(self.matrix.colCount):
-			self.matrix.cols[i] = (self.matrix.cols[i][0] - point[0], self.matrix.cols[i][1] - point[1])
+		#for i in range(self.matrix.colCount):
+		#	self.matrix.cols[i] = (self.matrix.cols[i][0] - point[0], self.matrix.cols[i][1] - point[1])
+		self.moveBy((point[0]*-1,point[1]*-1))
 		self.rotateAroundOrigin(factor)
-		for i in range(self.matrix.colCount):
-			self.matrix.cols[i] = (self.matrix.cols[i][0] + point[0], self.matrix.cols[i][1] + point[1])
+		self.moveBy(point)
+		#for i in range(self.matrix.colCount):
+		#	self.matrix.cols[i] = (self.matrix.cols[i][0] + point[0], self.matrix.cols[i][1] + point[1])
 
 	def getCenter(self):
 		centerX = 0
@@ -90,11 +92,18 @@ class SimplePoly:
 
 	def scaleInPlace(self, factor):
 		center = self.getCenter()
-		for i in range(self.matrix.colCount):
-			self.matrix.cols[i] = (self.matrix.cols[i][0] - center[0], self.matrix.cols[i][1] - center[1])
+		#for i in range(self.matrix.colCount):
+		#	self.matrix.cols[i] = (self.matrix.cols[i][0] - center[0], self.matrix.cols[i][1] - center[1])
+		self.moveBy((center[0]*-1,center[1]*-1))
 		self.scale(factor)
+		#for i in range(self.matrix.colCount):
+		#	self.matrix.cols[i] = (self.matrix.cols[i][0] + center[0], self.matrix.cols[i][1] + center[1])
+		self.moveBy(center)
+
+	#offset - (x,y) vector to be added to current position(s)
+	def moveBy(self, offset):
 		for i in range(self.matrix.colCount):
-			self.matrix.cols[i] = (self.matrix.cols[i][0] + center[0], self.matrix.cols[i][1] + center[1])
+			self.matrix.cols[i] = (self.matrix.cols[i][0] + offset[0], self.matrix.cols[i][1] + offset[1])
 
 	def __str__(self):
 		return str(self.matrix)
