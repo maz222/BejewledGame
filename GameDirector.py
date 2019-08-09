@@ -30,7 +30,8 @@ class RotateState(GameState):
       self.totalAngle = 0
       self.clockWise = clockWise
    def update(self, inputs):
-      rAmt = 5
+      #rAmt = 5
+      rAmt = 10;
       grid = self.gameData["grid"]
       if self.clockWise:
          grid.rotateGrid(rAmt)

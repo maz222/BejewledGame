@@ -35,10 +35,10 @@ class BaseBlock:
 		self.poly = BlockPoly(self.position.cols[0], self.width, self.height)
 		#self.poly.updateOrigin(self.position)
 
-	def rotate(self, clockWise):
+	def rotate(self, clockWise=False):
 		return
 
-	def rotateAroundPoint(self, factor, point):
+	def rotateAroundPoint(self, point, factor):
 		#point = (-point[0],-point[1])
 		#self.position += SimpleMat([point])
 		#factor = factor % 360
@@ -56,6 +56,9 @@ class BaseBlock:
 
 	def scale(self, factor):
 		self.poly.scaleTo(factor)
+
+	def getPoints(self,poly):
+		return poly.getPoints()
 
 	#offset = (x,y) for uper left corner of the grid
 	def draw(self, screen, offset=(0,0)):

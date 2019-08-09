@@ -16,9 +16,10 @@ clock = pygame.time.Clock()
 factory = BlockFactory()
 
 cell = factory.build(center)
+offset = (20,20)
 
-scale = 0
 
+scale = 1
 while not done:
     events = pygame.event.get()
     for event in events:
@@ -27,15 +28,15 @@ while not done:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DELETE:
                 cell = factory.build(center)
-    if scale >= 1:
-        scale = 0
-    scale += .05
+    scale -= .025
+    if scale <= 0:
+        scale = 1
     #update blocks
     #cell.rotateAroundPoint(5,center)
     #cell.rotateInPlace(5)
-    cell.scale(1+scale)
+    #cell.scale(scale)
     screen.fill((200,200,200))
     #Draw blocks
-    cell.draw(screen)
+    cell.draw(screen, (20,20))
     pygame.display.flip()
     clock.tick(60)

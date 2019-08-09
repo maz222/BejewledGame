@@ -1,3 +1,5 @@
+from BlockFactory import BlockFactory
+
 from BaseBlock import BaseBlock
 
 from Cursor import Cursor
@@ -15,6 +17,7 @@ class ColorGrid:
 
 		# (n) by (n) grid
 		def __init__(self,n):
+			self.blockFactory = BlockFactory()
 			self.grid = []
 			#add second, empty grid
 			for i in range(n):
@@ -26,7 +29,7 @@ class ColorGrid:
 				self.grid.append([])
 				for j in range(n):
 					cellPos = (j * (cellWidth + padding), (n+i) * (cellHeight + padding))
-					self.grid[n+i].append(BaseBlock(random.randint(1,4), cellPos))
+					self.grid[n+i].append(self.blockFactory.build(cellPos))
 			self.n = n
 			self.center = (n*(cellWidth+padding)/2, n*(cellHeight+padding) + n*(cellHeight+padding)/2)
 
@@ -45,6 +48,10 @@ class ColorGrid:
 					right = ((y+N),(N-1-x))
 					bottom = ((N-1-x+N),(N-1-y))
 					left = ((N-1-y+N),(x))
+					self.grid[top[0]][top[1]].rotate()
+					self.grid[right[0]][right[1]].rotate()
+					self.grid[bottom[0]][bottom[1]].rotate()
+					self.grid[left[0]][left[1]].rotate()
 					self.swapCells(top, left)
 					self.swapCells(top, bottom)
 					self.swapCells(top, right)
@@ -181,10 +188,10 @@ class ColorGrid:
 					if self.grid[row][col] == None:
 						emptyStack.append((row,col))
 					else:
-						if self.grid[row][col].isMoveable and len(emptyStack) > 0:
+						if self.grid[row][col].getIsMoveable() and len(emptyStack) > 0:
 							toMove.append(((row,col),emptyStack.pop(0)))
 							emptyStack.append((row,col))
-						if self.grid[row][col].isMoveable == False:
+						if self.grid[row][col].getIsMoveable() == False:
 							emptyStack = []
 				if len(toMove) > 0:
 					colList.append(toMove)
@@ -204,7 +211,7 @@ class ColorGrid:
 
 		def spawnNewCells(self, emptyCells):
 			for cell in emptyCells:
-				self.grid[cell[0]-self.n][cell[1]] = BaseBlock(random.randint(1,4),(cell[1] * (cellWidth + padding), (cell[0]-self.n) * (cellHeight + padding)))
+				self.grid[cell[0]-self.n][cell[1]] = self.blockFactory.build((cell[1] * (cellWidth + padding), (cell[0]-self.n) * (cellHeight + padding)))
 
 		def scaleCells(self, cellList, factor):
 			for index in cellList:
@@ -221,7 +228,7 @@ class ColorGrid:
 				for cell in row:
 					if cell != None: 
 						#cell.rotateInPlace(-factor)
-						cell.rotateAroundPoint(factor,t)
+						cell.rotateAroundPoint(t,factor)
 			self.cursor.poly.rotateAroundPoint(t,factor)
 
 		def draw(self, screen, position, drawCursor=True):

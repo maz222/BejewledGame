@@ -1,6 +1,6 @@
 from BaseBlock import BaseBlock
 
-from SimpleVector import SimplePoly
+from SimpleVector import MemoryPoly
 from SimpleVector import SimpleMat
 
 import math
@@ -31,7 +31,7 @@ class DirectionalBlock(BaseBlock):
 		rightPoly = [topRight,bottomRight,center]
 		bottomPoly = [bottomRight, bottomLeft, center]
 		leftPoly = [bottomLeft, topLeft, center]
-		polys = [SimplePoly(topPoly),SimplePoly(rightPoly),SimplePoly(bottomPoly),SimplePoly(leftPoly)]
+		polys = [MemoryPoly(topPoly),MemoryPoly(rightPoly),MemoryPoly(bottomPoly),MemoryPoly(leftPoly)]
 		return polys
 
 	def __init__(self, colors, position, width, height):
@@ -84,14 +84,12 @@ class DirectionalBlock(BaseBlock):
 
 	def scale(self, factor):
 		for p in self.polys:
-			#p.scaleTo(factor)
-			p.scaleInPlace(factor)
-			if factor > 1:
-				distance = math.sqrt((0-25)**2 + (0-25)**2) * (factor - 1)
-				#p.moveBy((distance*-1,distance*-1))
-			else:
-				distance = math.sqrt((0-25)**2 + (0-25)**2) * (1 - factor)
-				#p.moveBy((distance,distance))
+			p.scaleTo(factor)
+		print(factor)
+		self.polys[0].poly.moveBy((0,25*(1-factor)))
+		self.polys[1].poly.moveBy((-25*(1-factor),0))
+		self.polys[2].poly.moveBy((0,-25*(1-factor)))
+		self.polys[3].poly.moveBy((25*(1-factor),0))
 
 	def draw(self, screen, offset=(0,0)):
 		for i in range(len(self.colors)):

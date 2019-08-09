@@ -14,7 +14,27 @@ class GridCellContainer:
 			newPosition = (oldPosition[0]+thickness,oldPosition[1]+thickness)
 			self.block.updatePosition(newPosition)
 
-	def rotateAroundPoint(self, factor, origin):
+	def getColor(self):
+		return self.block.getColor()
+
+	def getIsMoveable(self):
+		return self.block.isMoveable
+
+	def updatePosition(self, newPosition):
+		if self.blockArmor:
+			self.blockArmor.updatePosition(newPosition)
+			newPosition = (newPosition[0]+self.blockArmor.thickness/2, newPosition[1]+self.blockArmor.thickness/2)
+		self.block.updatePosition(newPosition)
+
+	def rotate(self):
+		self.block.rotate()
+
+	def getPosition(self):
+		if self.blockArmor:
+			return self.blockArmor.getPosition()
+		return self.block.getPosition()
+
+	def rotateAroundPoint(self, origin, factor):
 		self.block.rotateAroundPoint(origin, factor)
 		if self.blockArmor:
 			self.blockArmor.poly.rotateAroundPoint(origin, factor)
@@ -52,8 +72,3 @@ class GridCellContainer:
 	def reduceHP(self):
 		if self.blockArmor:
 			self.blockArmor.reduceHealth()
-
-
-
-
-

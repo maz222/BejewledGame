@@ -1,11 +1,12 @@
 import pygame
 
 from SimpleVector import BlockPoly
+from SimpleVector import SimpleMat
 
 class BlockArmor:
 	def __init__(self, position, width, height, thickness, health=1):
 		self.health = health
-		self.position = position
+		self.position = SimpleMat([position])
 		self.height = height
 		self.width = width
 		self.thickness = thickness
@@ -16,6 +17,9 @@ class BlockArmor:
 		self.position = SimpleMat([newPosition])
 		self.poly = BlockPoly(self.position.cols[0], self.width, self.height)
 		#self.poly.updateOrigin(self.position)
+
+	def getPosition(self):
+		return self.position.cols[0]
 
 	def reduceHealth(self):
 		self.health -= 1

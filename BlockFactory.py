@@ -3,7 +3,8 @@ from GameConstants import GameConstants
 from GridCell import GridCellContainer
 
 from BaseBlock import BaseBlock
-from DirectionalBlock import DirectionalBlock
+#from DirectionalBlock import DirectionalBlock
+from DirectionalBlock2 import DirectionalBlock
 from BlockArmor import BlockArmor
 
 import random
